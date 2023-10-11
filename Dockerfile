@@ -5,7 +5,7 @@ FROM openjdk:11-jre-slim
 WORKDIR /app
 
 # Copy the application JAR file into the container
-COPY HelloWorld.jar .
+COPY HelloWorld.jar /app
 
 # Specify the command to run your Java application
 CMD ["java", "-jar", "HelloWorld.jar"]
