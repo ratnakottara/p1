@@ -29,7 +29,7 @@ pipeline {
             steps {
                 script {
                     // Build the Docker image with a build version tag
-                    def dockerImage = docker.build("jenkins-java-img:${BUILD_NUMBER}")
+                    def dockerImage = docker.build(def dockerImage = docker.build("jenkins-java-img:1"))
 
                     // Run unit tests inside the Docker container (replace with your test commands)
                     
@@ -41,9 +41,9 @@ pipeline {
             steps {
                 // Push the Docker image to your AWS ECR repository (replace with your ECR details)
                 script {
-                    withAWS(credentials: ['Admin-user']) {
+                    withAWS(credentials: 'Admin-user') {
                         docker.withRegistry('390067525135.dkr.ecr.ap-south-1.amazonaws.com/', 'ecr.ap-south-1:aws-ecr-credentials') {
-                            def dockerImage = docker.image("jenkins-java-img:${BUILD_NUMBER}")
+                            def dockerImage = docker.image("jenkins-java-img:1")
                             dockerImage.push()
                         }
                     }
@@ -55,7 +55,7 @@ pipeline {
             steps {
                 // Define deployment steps to an EC2 instance (e.g., SSH, SCP, etc.)
                 // Make sure you have SSH keys set up for authentication
-                sh 'ssh ec2-user@52.66.161.18 "deploy-command"'
+                sh 'ssh ec2-user@43.204.25.23 "deploy-command"'
             }
         }
 
