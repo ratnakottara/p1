@@ -27,15 +27,16 @@ pipeline {
 
         stage('Build and Test Docker Image') {
             steps {
-                script {
-                    // Build the Docker image with a build version tag
-                    def dockerImage = docker.build(def dockerImage = docker.build("jenkins-java-img:1"))
+              script {
+                // Build the Docker image with a build version tag
+                def builtImage = docker.build("jenkins-java-img:2")
 
-                    // Run unit tests inside the Docker container (replace with your test commands)
-                    
-                }
-            }
-        }
+                // Run unit tests inside the Docker container (replace with your test commands)
+            
+               }
+           }
+       }
+
 
         stage('Push Docker Image to ECR') {
             steps {
@@ -43,7 +44,7 @@ pipeline {
                 script {
                     withAWS(credentials: 'Admin-user') {
                         docker.withRegistry('390067525135.dkr.ecr.ap-south-1.amazonaws.com/', 'ecr.ap-south-1:aws-ecr-credentials') {
-                            def dockerImage = docker.image("jenkins-java-img:1")
+                            def dockerImage = docker.image("jenkins-java-img:2")
                             dockerImage.push()
                         }
                     }
