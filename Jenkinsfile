@@ -23,11 +23,4 @@ pipeline {
             }
         }
     }
-
-    post {
-        always {
-            // Clean up (optional)
-            sh 'rm HelloWorld.class'
-        }
-    }
 }
