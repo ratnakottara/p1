@@ -26,16 +26,29 @@ pipeline {
         }
 
         stage('Build and Test Docker Image') {
-            steps {
-              script {
-                // Build the Docker image with a build version tag
-                def builtImage = docker.build("jenkins-java-img:2")
+          steps {
+            script {
+              // Define the Dockerfile content and save it in your repository
+              def dockerfileContent = """
+              FROM openjdk:11
+              COPY HelloWorld.java /app/
+              WORKDIR /app/
+              RUN javac HelloWorld.java
+              CMD ["java", "HelloWorld"]
+              """
+              writeFile file: 'Dockerfile', text: dockerfileContent
 
-                // Run unit tests inside the Docker container (replace with your test commands)
-            
+              // Build the Docker image using the provided Dockerfile
+              def builtImage = docker.build("jenkins-java-img:2", "-f Dockerfile .")
+
+              // Run unit tests inside the Docker container (replace with your test commands)
+              builtImage.inside {
+                sh 'echo "Running unit tests"'
                }
            }
        }
+   }
+
 
 
         stage('Push Docker Image to ECR') {
