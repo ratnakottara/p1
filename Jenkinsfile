@@ -28,7 +28,7 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 // Build the Docker image using the provided Dockerfile
-                sh 'docker build -t my-java-app .'
+                bat 'docker build -t my-java-app .'
             }
         }
     }
