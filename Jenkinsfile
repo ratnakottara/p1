@@ -7,6 +7,7 @@ pipeline {
                 // Checkout your Git repository from your in-house code repo (replace with your repo URL)
                 checkout([$class: 'GitSCM', branches: [[name: '*/main']], doGenerateSubmoduleConfigurations: false, extensions: [], userRemoteConfigs: [[url: 'https://github.com/ratnakottara/p1.git']])
 
+
                 // Make sure Docker is available in your Jenkins agent
                 script {
                     // Check if Docker is installed
