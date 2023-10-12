@@ -5,7 +5,17 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 // Checkout your Git repository from your in-house code repo (replace with your repo URL)
-                checkout([$class: 'GitSCM', branches: [[name: '*/main']], doGenerateSubmoduleConfigurations: false, extensions: [], userRemoteConfigs: [[url: 'https://github.com/ratnakottara/p1.git']]])
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], doGenerateSubmoduleConfigurations: false, extensions: [], userRemoteConfigs: [[url: 'https://github.com/ratnakottara/p1.git']])
+
+                // Make sure Docker is available in your Jenkins agent
+                script {
+                    // Check if Docker is installed
+                    def dockerInstalled = sh(script: 'docker --version', returnStatus: true) == 0
+
+                    if (!dockerInstalled) {
+                        error('Docker is not installed on this agent. Please install Docker and configure it.')
+                    }
+                }
             }
         }
 
@@ -26,35 +36,26 @@ pipeline {
         }
 
         stage('Build and Test Docker Image') {
-          steps {
-            script {
-              // Define the Dockerfile content and save it in your repository
-              def dockerfileContent = """
-              FROM openjdk:11
-              COPY HelloWorld.java /app/
-              WORKDIR /app/
-              RUN javac HelloWorld.java
-              CMD ["java", "HelloWorld"]
-              """
-              writeFile file: 'Dockerfile', text: dockerfileContent
+            steps {
+                script {
+                    // Ensure Docker is installed
+                    def dockerInstalled = sh(script: 'docker --version', returnStatus: true) == 0
 
-              // Build the Docker image using the provided Dockerfile
-              def builtImage = docker.build("jenkins-java-img:2", "-f Dockerfile .")
+                    if (!dockerInstalled) {
+                        error('Docker is not installed. Please install Docker and configure it.')
+                    }
 
-              // Run unit tests inside the Docker container (replace with your test commands)
-              builtImage.inside {
-                sh 'echo "Running unit tests"'
-               }
-           }
-       }
-   }
-
-
+                    // Build the Docker image with a build version tag
+                    def builtImage = docker.build("jenkins-java-img:2", "-f Dockerfile .")
+                }
+            }
+        }
 
         stage('Push Docker Image to ECR') {
             steps {
                 // Push the Docker image to your AWS ECR repository (replace with your ECR details)
                 script {
+                    // Add your AWS and ECR credentials here if not already configured
                     withAWS(credentials: 'Admin-user') {
                         docker.withRegistry('390067525135.dkr.ecr.ap-south-1.amazonaws.com/', 'ecr.ap-south-1:aws-ecr-credentials') {
                             def dockerImage = docker.image("jenkins-java-img:2")
