@@ -32,10 +32,12 @@ pipeline {
         stage('Push Docker Image to ECR') {
             steps {
                 // Add your AWS and ECR credentials here if not already configured
-                withAWS(credentials: 'Admin-user') {
-                    docker.withRegistry('390067525135.dkr.ecr.ap-south-1.amazonaws.com/', 'ecr.ap-south-1:aws-ecr-credentials') {
-                        def dockerImage = docker.image("jenkins-java-img:2")
-                        dockerImage.push()
+                script {
+                    withAWS(credentials: 'Admin-user') {
+                        docker.withRegistry('390067525135.dkr.ecr.ap-south-1.amazonaws.com/', 'ecr.ap-south-1:aws-ecr-credentials') {
+                            def dockerImage = docker.image("jenkins-java-img:2")
+                            dockerImage.push()
+                        }
                     }
                 }
             }
@@ -51,7 +53,7 @@ pipeline {
 
         stage('Configure Security Group') {
             steps {
-                // Use AWS CLI or SDK to configure security group for EC2
+                // Use AWS CLI or SDK to configure the security group for EC2
                 sh 'aws ec2 authorize-security-group-ingress --group-id sg-0273520d4b29ccc2f --protocol ssh --port 22 --cidr 172.31.0.0/16'
             }
         }
