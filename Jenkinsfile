@@ -5,18 +5,7 @@ pipeline {
         stage('Checkout Code') {
             steps {
                 // Checkout your Git repository from your in-house code repo (replace with your repo URL)
-                checkout([$class: 'GitSCM', branches: [[name: '*/main']], doGenerateSubmoduleConfigurations: false, extensions: [], userRemoteConfigs: [[url: 'https://github.com/ratnakottara/p1.git']]])
-
-
-                // Make sure Docker is available in your Jenkins agent
-                script {
-                    // Check if Docker is installed
-                    def dockerInstalled = sh(script: 'docker --version', returnStatus: true) == 0
-
-                    if (!dockerInstalled) {
-                        error('Docker is not installed on this agent. Please install Docker and configure it.')
-                    }
-                }
+                checkout([$class: 'GitSCM', branches: [[name: '*/main']], doGenerateSubmoduleConfigurations: false, extensions: [], userRemoteConfigs: [[url: 'https://github.com/ratnakottara/p1.git']])
             }
         }
 
@@ -38,17 +27,8 @@ pipeline {
 
         stage('Build and Test Docker Image') {
             steps {
-                script {
-                    // Ensure Docker is installed
-                    def dockerInstalled = sh(script: 'docker --version', returnStatus: true) == 0
-
-                    if (!dockerInstalled) {
-                        error('Docker is not installed. Please install Docker and configure it.')
-                    }
-
-                    // Build the Docker image with a build version tag
-                    def builtImage = docker.build("jenkins-java-img:2", "-f Dockerfile .")
-                }
+                // Build the Docker image with a build version tag
+                bat 'docker build -t jenkins-java-img:2 -f Dockerfile .'
             }
         }
 
@@ -58,10 +38,7 @@ pipeline {
                 script {
                     // Add your AWS and ECR credentials here if not already configured
                     withAWS(credentials: 'Admin-user') {
-                        docker.withRegistry('390067525135.dkr.ecr.ap-south-1.amazonaws.com/', 'ecr.ap-south-1:aws-ecr-credentials') {
-                            def dockerImage = docker.image("jenkins-java-img:2")
-                            dockerImage.push()
-                        }
+                        bat 'docker push 390067525135.dkr.ecr.ap-south-1.amazonaws.com/jenkins-java-img:2'
                     }
                 }
             }
@@ -71,14 +48,14 @@ pipeline {
             steps {
                 // Define deployment steps to an EC2 instance (e.g., SSH, SCP, etc.)
                 // Make sure you have SSH keys set up for authentication
-                sh 'ssh ec2-user@43.204.25.23 "deploy-command"'
+                bat 'ssh ec2-user@43.204.25.23 "deploy-command"'
             }
         }
 
         stage('Configure Security Group') {
             steps {
-                // Use AWS CLI or SDK to configure security group for EC2
-                sh 'aws ec2 authorize-security-group-ingress --group-id sg-0273520d4b29ccc2f --protocol ssh --port 22 --cidr 172.31.0.0/16'
+                // Use AWS CLI or SDK to configure a security group for EC2
+                bat 'aws ec2 authorize-security-group-ingress --group-id sg-0273520d4b29ccc2f --protocol tcp --port 22 --cidr 172.31.0.0/16'
             }
         }
     }
