@@ -12,23 +12,21 @@ pipeline {
         stage('Build') {
             steps {
                 // Compile the Java application (if needed)
-                // Replace 'javac' and 'HelloWorld.java' with your actual build commands
-                bat 'javac HelloWorld.java'
+                sh 'javac HelloWorld.java'
             }
         }
 
         stage('Run') {
             steps {
                 // Run the Java application
-                // Replace 'java HelloWorld' with your actual run command
-                bat 'java HelloWorld'
+                sh 'java HelloWorld'
             }
         }
 
         stage('Build Docker Image') {
             steps {
                 // Build the Docker image using the provided Dockerfile
-                bat 'docker build -t my-java-app .'
+                sh 'sudo docker build -t my-java-app .'
             }
         }
     }
